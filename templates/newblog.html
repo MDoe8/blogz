@@ -1,8 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
-        <form action="" method="POST">
-            <input type="text" name="title" placeholder="Title">
-            <input type="text" name="body" placeholder="Body">
-            <input type="submit">
-        </form>
+    {% if errorMessage %}
+    <div>
+        <h1>{{errorMessage}}</h1>
+    </div>
+    {% endif %}
+    <form action="" method="POST">
+        <input type="text" name="title" placeholder="Title" value="{{form['title']}}">
+        <input type="text" name="body" placeholder="Body" value="{{form['body']}}">
+        <input type="submit">
+    </form>
 {% endblock %}

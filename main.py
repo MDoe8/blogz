@@ -23,8 +23,12 @@ entries = []
 
 @app.route('/blog', methods=['GET'])
 def index():
-    entries = Blog.query.all()
-    
+    if 'id' in request.args: 
+        id = request.args['id']
+        entry = Blog.query.filter_by(id=id).first()
+        return render_template('singleblog.html', title=entry.title, blog=entry)
+     
+    entries = Blog.query.order_by(Blog.id.desc()).all()
     return render_template('blog.html', title='My Blog', blogs=entries)
 
 
@@ -34,12 +38,19 @@ def newpost():
         entry = Blog('blog')
         entry.title = request.form['title']
         entry.body = request.form['body']
+
+        if entry.title == '':
+            return render_template('newblog.html', title="New Blog Post", form=request.form, errorMessage="Title is required")
+
+        if entry.body == '':
+            return render_template('newblog.html', title="New Blog Post", form=request.form, errorMessage="Body is requried")
+
         db.session.add(entry)
         db.session.commit()
 
-        return redirect('/blog', code=302)
+        return redirect('/blog?id=' + str(entry.id), code=302)
     
-    return render_template('newblog.html', title="New Blog Post")
+    return render_template('newblog.html', title="New Blog Post", form=[])
 
 if __name__ == '__main__':
     app.run()
