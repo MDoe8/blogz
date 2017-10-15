@@ -1,25 +1,12 @@
 <html>
     <head>
         <title>{{title}}</title>
-        <link rel="stylesheet" href="https://blackrockdigital.github.io/startbootstrap-blog-post/vendor/bootstrap/css/bootstrap.min.css">
-        <script type="javascript" src="https://blackrockdigital.github.io/startbootstrap-blog-post/vendor/bootstrap/js/bootstrap.min.js"></script>
     </head>
     <body>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container">
-                <a class="navbar-brand" href="/blog">My Blog Site</a>
-                <div class="collapse navbar-collapse id="navbarResponsive>
-                    <ul class="navbar-nav ml-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/blog">Main Blog</a>
-                        </li>
-                        <l class="nav-item">
-                            <a class="nav-link" href="/newpost">Add New Blog Post</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
+        <div>
+            <a href="/blog">Main Blog</a>
+            <a href="/newpost">Add New Blog Post</a>
+        </div>
         {% block content %}
         {% endblock %}
     </body>

@@ -1,13 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
     {% for entry in blogs %}
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <h1 class="mt-4"><a href="/blog?id={{entry.id}}">{{entry.title}}</a></h1>
-                <p class="lead">{{entry.body | safe}}</p>
-            </div>
-        </div>
-    </div>
+    <div><h2><a href="/blog?id={{entry.id}}">{{entry.title}}</a></h2>
+    <p>{{entry.body}}</p>
+    <hr /></div>
     {% endfor %}
 {% endblock %}
