@@ -1,14 +1,15 @@
-from flask import Flask, request, redirect, render_template
+from flask import Flask, request, redirect, render_template, session #we wanna have access to all of these
 from flask_sqlalchemy import SQLAlchemy 
 from pprint import pprint
 # Note: the connection string after :// contains the following info:
 # user:password@server:portNumber/databaseName
-app = Flask(__name__)
-app.config['DEBUG'] = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:blogz@127.0.0.1:8889/blogz'
+app = Flask(__name__) #create a flask object
+app.config['DEBUG'] = True #setting the values for the flask object
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:blogz@127.0.0.1:8889/blogz' #this connects to the database
 app.config['SQLALCHEMY_ECHO'] = True
+app.secret_key="Hello"
 
-db = SQLAlchemy(app)
+db = SQLAlchemy(app) #we are creating a SQLAlchemy object and storing it in the db
 
 class Blog(db.Model):
 
@@ -17,7 +18,7 @@ class Blog(db.Model):
     body = db.Column(db.Text())
     owner_id= db.Column(db.Integer,db.ForeignKey('user.id'))
 
-    def __init__(self, name, owner):
+    def __init__(self, name, owner): #default function that gets called when a class is created
         self.name = name
         self.owner = owner
 
@@ -26,19 +27,30 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120))
     password = db.Column(db.String(120))
-    blogs = db.relationship("Blog")
+    blogs = db.relationship("Blog", backref="user")
 
     def __init__(self, name):
         self.name = name
 
 entries = []
+@app.route('/user', methods=['GET'])  # decorator knows that the following lines is 
+#what it would call if the decorator matched. # if the app. route '/' or whatever else I
+# might have there and if it matched the post or get, it owuld run the code below. GET retrieve info, POST send info
+def userpage():
+    if 'id' in request.args: 
+        id = request.args['id']
+        user = User.query.filter_by(id=id).first()
+        return render_template('singleUser.html', user=user)
+
+    return redirect("/")
+
 
 @app.route('/blog', methods=['GET'])
 def blog():
     if 'id' in request.args: 
         id = request.args['id']
         entry = Blog.query.filter_by(id=id).first()
-        return render_template('singleUser.html', title=entry.title, blog=entry)
+        return render_template('singleblog.html', title=entry.title, blog=entry)
      
     entries = Blog.query.order_by(Blog.id.desc()).all()
     return render_template('blog.html', title='My Blog', blogs=entries)
@@ -88,6 +100,7 @@ def login():
 
         #we need to check the password is correct
         if user.password==password:
+            session["Username"]=user.username
             return redirect('/newpost', code=302)
         else: 
             return render_template ('login.html')#todo add warning for incorrect password
@@ -96,19 +109,23 @@ def login():
 @app.route('/logout', methods=['POST'])
 def logout():
     #todo need to clear the username from the session
+    del session["Username"]
     return redirect('/blog')
 
 @app.route('/', methods=['GET'])
 def index():
-    return render_template('index.html')
+    users=User.query.all() #with this you can query all rows of the Task table
+    return render_template('index.html',users=users)
 
 @app.route('/newpost', methods=['GET', 'POST'])
 def newpost():
     if request.method == 'POST':
-        entry = Blog('blog')
+        user = User.query.filter_by(username=session['Username']).first()
+        entry = Blog('blog', user)
         entry.title = request.form['title']
         entry.body = request.form['body']
         entry.password = request.form['password']
+        entry.owner_id = user.id
 
         if entry.title == '':
             return render_template('newblog.html', title="New Blog Post", form=request.form, errorMessage="Title is required")
