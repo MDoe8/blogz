@@ -85,6 +85,7 @@ def signup():
 
         db.session.add(user)
         db.session.commit()
+        session["Username"]=user.username
         return redirect('/newpost', code=302)
     
     return render_template('signup.html')
@@ -106,9 +107,8 @@ def login():
             return render_template ('login.html')#todo add warning for incorrect password
     return render_template('login.html')
 
-@app.route('/logout', methods=['POST'])
+@app.route('/logout', methods=['POST', 'GET'])
 def logout():
-    #todo need to clear the username from the session
     del session["Username"]
     return redirect('/blog')
 
@@ -121,10 +121,10 @@ def index():
 def newpost():
     if request.method == 'POST':
         user = User.query.filter_by(username=session['Username']).first()
+        
         entry = Blog('blog', user)
         entry.title = request.form['title']
         entry.body = request.form['body']
-        entry.password = request.form['password']
         entry.owner_id = user.id
 
         if entry.title == '':
